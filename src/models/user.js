@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Task = require("./task");
 const { jwtSalt } = require("../common/config");
 
 const { Schema } = mongoose;
@@ -89,6 +90,15 @@ schema.pre("save", async function (next) {
     }
 
     //continua con la successiva funzione middleware
+    next();
+});
+
+/**
+ * Funzione middleware richiamata prima di eseguire il remove. Elimino i task correlati
+ */
+schema.pre("remove", async function (next) {
+    const user = this;
+    Task.deleteMany({ owner: user._id });
     next();
 });
 
