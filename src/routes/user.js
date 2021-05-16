@@ -121,4 +121,32 @@ route.post("/users/login", async (req, res) => {
     }
 });
 
+/**
+ * Esegui il loogout per un singolo accesso
+ */
+route.post("/users/logout", auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => token.token != req.token);
+        await req.user.save();
+
+        res.json(req.user);
+    } catch (e) {
+        res.status(500).json(e);
+    }
+});
+
+/**
+ * Esegui il loogout per tutti gli accessi
+ */
+route.post("/users/logoutAll", auth, async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+
+        res.json(req.user);
+    } catch (e) {
+        res.status(500).json(e);
+    }
+});
+
 module.exports = route;
