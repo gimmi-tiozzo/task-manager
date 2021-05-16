@@ -8,16 +8,19 @@ const route = express.Router();
 /**
  * Ricerca tutti i task
  */
-route.get("/tasks", auth, async (_, res) => {
+route.get("/tasks", auth, async (req, res) => {
     try {
-        const tasks = await Task.find({});
-        tasks.forEach(async (t) => await t.populate("owner").execPopulate()); //TODO: capire perchè non si popola tasks
+        //const tasks = await Task.find({});
 
-        if (tasks.length == 0) {
-            return res.status("404").json({ message: "Tasks not found" });
-        }
+        // const tasks = await Task.find({ owner: req.user._id });
+        // tasks.forEach(async (t) => await t.populate("owner").execPopulate()); //TODO: capire perchè non si popola tasks
 
-        res.json(tasks);
+        // if (tasks.length == 0) {
+        //     return res.status("404").json({ message: "Tasks not found" });
+        // }
+
+        await req.user.populate("tasks").execPopulate();
+        res.json(req.user.tasks);
     } catch (e) {
         res.status(500).json();
     }
@@ -28,8 +31,9 @@ route.get("/tasks", auth, async (_, res) => {
  */
 route.get("/tasks/:id", auth, async (req, res) => {
     try {
-        const id = req.params.id;
-        const task = await Task.findById(id);
+        const _id = req.params.id;
+        //const task = await Task.findById(_id);
+        const task = await Task.findOne({ _id, owner: req.user._id });
         await task.populate("owner").execPopulate();
 
         if (!task) {
@@ -64,7 +68,7 @@ route.post("/tasks", auth, async (req, res) => {
  */
 route.patch("/tasks/:id", auth, async (req, res) => {
     try {
-        const id = req.params.id;
+        const _id = req.params.id;
         const requestProperties = Object.keys(req.body);
         const allowProperties = ["description", "completed"];
         const isReqPropsValid = requestProperties.every((prop) => allowProperties.includes(prop));
@@ -73,12 +77,17 @@ route.patch("/tasks/:id", auth, async (req, res) => {
             return res.status(400).json({ message: "Invalid properties for Update Task by id" });
         }
 
-        const task = await Task.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
-        await task.populate("owner").execPopulate();
+        // const task = await Task.findByIdAndUpdate(_id, req.body, { new: true, runValidators: true });
+
+        const task = await Task.findOne({ _id, owner: req.user._id });
 
         if (!task) {
-            return res.status("404").json({ message: `Task not found by id ${id}` });
+            return res.status("404").json({ message: `Task not found by id ${_id}` });
         }
+
+        requestProperties.forEach((prop) => (task[prop] = req.body[prop]));
+        await task.save();
+        await task.populate("owner").execPopulate();
 
         res.json(task);
     } catch (e) {
@@ -91,8 +100,10 @@ route.patch("/tasks/:id", auth, async (req, res) => {
  */
 route.delete("/tasks/:id", auth, async (req, res) => {
     try {
-        const id = req.params.id;
-        const task = await Task.findByIdAndDelete(id);
+        const _id = req.params.id;
+        //const task = await Task.findByIdAndDelete(_id);
+
+        const task = await Task.findOneAndDelete({ _id, owner: req.user._id });
 
         if (!task) {
             return res.status("404").json({ message: `Task not found by id ${id}` });
