@@ -130,7 +130,7 @@
 					"response": []
 				},
 				{
-					"name": "Get Profile",
+					"name": "Get Me",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -200,6 +200,33 @@
 					"response": []
 				},
 				{
+					"name": "Update Me",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Gimmi Tiozzo Netti\",\r\n    \"age\": 41,\r\n    \"password\": \"123456789e\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Update User by id",
 					"request": {
 						"method": "PATCH",
@@ -233,6 +260,28 @@
 					"response": []
 				},
 				{
+					"name": "Delete Me",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/users/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Delete User by Id",
 					"request": {
 						"method": "DELETE",
@@ -249,7 +298,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "60a13de13a34ea12305e059a"
+									"value": "60a15a11c51bed3c58be7d10"
 								}
 							]
 						}

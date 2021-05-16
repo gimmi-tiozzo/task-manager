@@ -62,6 +62,28 @@ route.post("/users", async (req, res) => {
 });
 
 /**
+ * Aggiorna User autenticato
+ */
+route.patch("/users/me", auth, async (req, res) => {
+    try {
+        const requestProperties = Object.keys(req.body);
+        const allowProperties = ["name", "email", "password", "age"];
+        const isReqPropsValid = requestProperties.every((prop) => allowProperties.includes(prop));
+
+        if (!isReqPropsValid) {
+            return res.status(400).json({ message: "Invalid properties for Update User by id" });
+        }
+
+        requestProperties.forEach((prop) => (req.user[prop] = req.body[prop]));
+        await req.user.save();
+
+        res.json(req.user);
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+});
+
+/**
  * Aggiorna uno User
  */
 route.patch("/users/:id", auth, async (req, res) => {
@@ -79,19 +101,35 @@ route.patch("/users/:id", auth, async (req, res) => {
 
         //in questo modo scatta l'evento pre save per calcolare hash password
         const user = await User.findById(id);
-        requestProperties.forEach((prop) => (user[prop] = req.body[prop]));
-        await user.save();
 
         if (!user) {
             return res.status("404").json({ message: `User not found by id ${id}` });
         }
 
+        requestProperties.forEach((prop) => (user[prop] = req.body[prop]));
+        await user.save();
+
         res.json(user);
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+});
+
+/**
+ * Elimina lo user autenticato
+ */
+route.delete("/users/me", auth, async (req, res) => {
+    try {
+        await req.user.remove();
+        res.json(req.user);
     } catch (e) {
         res.status(500).json(e);
     }
 });
 
+/**
+ * Elimina uno User
+ */
 route.delete("/users/:id", auth, async (req, res) => {
     try {
         const id = req.params.id;
