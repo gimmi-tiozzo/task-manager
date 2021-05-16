@@ -97,8 +97,9 @@ schema.pre("save", async function (next) {
  * Funzione middleware richiamata prima di eseguire il remove. Elimino i task correlati
  */
 schema.pre("remove", async function (next) {
+    console.log("Delete task");
     const user = this;
-    Task.deleteMany({ owner: user._id });
+    await Task.deleteMany({ owner: user._id });
     next();
 });
 
