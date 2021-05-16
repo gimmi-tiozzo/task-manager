@@ -84,6 +84,19 @@ schema.pre("save", async function (next) {
 });
 
 /**
+ * Creazione JSON eliminando i dati sensibili
+ */
+schema.methods.toJSON = function () {
+    const user = this;
+    const deepUserCopy = user.toObject();
+
+    delete deepUserCopy.password;
+    delete deepUserCopy.tokens;
+
+    return deepUserCopy;
+};
+
+/**
  * Genera un token JWT
  */
 schema.methods.generateAuthToken = async function () {
