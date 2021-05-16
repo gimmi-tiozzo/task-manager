@@ -70,6 +70,15 @@ const schema = new Schema({
 });
 
 /**
+ * Proprieta virtuale di legame con i task
+ */
+schema.virtual("tasks", {
+    ref: "Task",
+    localField: "_id",
+    foreignField: "owner",
+});
+
+/**
  * Funzione middleware richiamata prima di eseguire il save. Salvo hash password
  */
 schema.pre("save", async function (next) {
@@ -133,6 +142,6 @@ schema.statics.findByCredentials = async (email, password) => {
 /**
  * Entità User
  */
-const User = mongoose.model("users", schema);
+const User = mongoose.model("User", schema);
 
 module.exports = User;

@@ -9,7 +9,8 @@ const route = express.Router();
  * Ricerca il profilo dello user autenticato con token JWT
  */
 route.get("/users/me", auth, async (req, res) => {
-    res.json(req.user);
+    await req.user.populate("tasks").execPopulate();
+    res.json({ user: req.user, tasks: req.user.tasks });
 });
 
 /**
@@ -18,6 +19,7 @@ route.get("/users/me", auth, async (req, res) => {
 route.get("/users", auth, async (_, res) => {
     try {
         const users = await User.find({});
+        users.forEach(async (u) => await u.populate("tasks").execPopulate()); //TODO: capire perchè non si popola tasks
 
         if (users.length == 0) {
             return res.status("404").json({ message: "Users not found" });
@@ -41,7 +43,8 @@ route.get("/users/:id", auth, async (req, res) => {
             return res.status("404").json({ message: `User not found by id ${id}` });
         }
 
-        return res.json(user);
+        await user.populate("tasks").execPopulate();
+        return res.json({ user, tasks: user.tasks });
     } catch (e) {
         res.status(500).json(e);
     }
@@ -77,7 +80,8 @@ route.patch("/users/me", auth, async (req, res) => {
         requestProperties.forEach((prop) => (req.user[prop] = req.body[prop]));
         await req.user.save();
 
-        res.json(req.user);
+        await req.user.populate("tasks").execPopulate();
+        res.json({ user: req.user, tasks: req.user.tasks });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -109,7 +113,8 @@ route.patch("/users/:id", auth, async (req, res) => {
         requestProperties.forEach((prop) => (user[prop] = req.body[prop]));
         await user.save();
 
-        res.json(user);
+        await user.populate("tasks").execPopulate();
+        res.json({ user, tasks: user.tasks });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
