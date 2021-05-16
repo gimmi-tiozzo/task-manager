@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
 const validator = require("validator");
+const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { jwtSalt } = require("../common/config");
+
+const { Schema } = mongoose;
 
 /**
  * Schema per entità User
@@ -19,6 +23,7 @@ const schema = new Schema({
      */
     email: {
         type: String,
+        unique: true,
         required: true,
         trim: true,
         lowercase: true,
@@ -43,7 +48,7 @@ const schema = new Schema({
         },
     },
     /**
-     * Eta
+     * Età
      */
     age: {
         type: Number,
@@ -54,7 +59,63 @@ const schema = new Schema({
             }
         },
     },
+    tokens: [
+        {
+            token: {
+                type: String,
+                required: true,
+            },
+        },
+    ],
 });
+
+/**
+ * Funzione middleware richiamata prima di eseguire il save. Salvo hash password
+ */
+schema.pre("save", async function (next) {
+    const user = this;
+
+    if (user.isModified("password")) {
+        user.password = await bcryptjs.hash(user.password, 8);
+    }
+
+    //continua con la successiva funzione middleware
+    next();
+});
+
+/**
+ * Genera un token JWT
+ */
+schema.methods.generateAuthToken = async function () {
+    const user = this;
+    const token = jwt.sign({ _id: user._id.toString() }, jwtSalt);
+
+    user.tokens.push({ token });
+    await user.save();
+
+    return token;
+};
+
+/**
+ * Ricerca un utente in mongodb
+ * @param {*} email email
+ * @param {*} password password
+ */
+schema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new Error("Unable to login");
+    }
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+
+    if (!isMatch) {
+        throw new Error("Unable to login");
+    }
+
+    return user;
+};
 
 /**
  * Entità User

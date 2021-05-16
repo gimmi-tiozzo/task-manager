@@ -1,13 +1,21 @@
 const express = require("express");
 const User = require("../models/user");
+const auth = require("../middleware/auth");
 require("../db/mongoose");
 
 const route = express.Router();
 
 /**
+ * Ricerca il profilo dello user autenticato con token JWT
+ */
+route.get("/users/me", auth, async (req, res) => {
+    res.json(req.user);
+});
+
+/**
  * Ricerca tutti gli user
  */
-route.get("/users", async (_, res) => {
+route.get("/users", auth, async (_, res) => {
     try {
         const users = await User.find({});
 
@@ -24,7 +32,7 @@ route.get("/users", async (_, res) => {
 /**
  * Ricerca user per id
  */
-route.get("/users/:id", async (req, res) => {
+route.get("/users/:id", auth, async (req, res) => {
     try {
         const id = req.params.id;
         const user = await User.findById(id);
@@ -45,7 +53,9 @@ route.get("/users/:id", async (req, res) => {
 route.post("/users", async (req, res) => {
     try {
         const user = await new User(req.body).save();
-        res.status(201).json(user);
+        const token = await user.generateAuthToken();
+
+        res.status(201).json({ user, token });
     } catch (e) {
         res.status(500).json(e);
     }
@@ -54,7 +64,7 @@ route.post("/users", async (req, res) => {
 /**
  * Aggiorna uno User
  */
-route.patch("/users/:id", async (req, res) => {
+route.patch("/users/:id", auth, async (req, res) => {
     try {
         const id = req.params.id;
         const requestProperties = Object.keys(req.body);
@@ -65,7 +75,12 @@ route.patch("/users/:id", async (req, res) => {
             return res.status(400).json({ message: "Invalid properties for Update User by id" });
         }
 
-        const user = await User.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+        //const user = await User.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+
+        //in questo modo scatta l'evento pre save per calcolare hash password
+        const user = await User.findById(id);
+        requestProperties.forEach((prop) => (user[prop] = req.body[prop]));
+        await user.save();
 
         if (!user) {
             return res.status("404").json({ message: `User not found by id ${id}` });
@@ -77,7 +92,7 @@ route.patch("/users/:id", async (req, res) => {
     }
 });
 
-route.delete("/users/:id", async (req, res) => {
+route.delete("/users/:id", auth, async (req, res) => {
     try {
         const id = req.params.id;
         const user = await User.findByIdAndDelete(id);
@@ -89,6 +104,20 @@ route.delete("/users/:id", async (req, res) => {
         res.json(user);
     } catch (e) {
         res.status(500).json(e);
+    }
+});
+
+/**
+ * Esegui il login e restituisci il token JWT
+ */
+route.post("/users/login", async (req, res) => {
+    try {
+        const user = await User.findByCredentials(req.body.email, req.body.password);
+        const token = await user.generateAuthToken();
+
+        res.json({ user, token });
+    } catch (e) {
+        res.status(400).json({ message: e.message });
     }
 });
 
