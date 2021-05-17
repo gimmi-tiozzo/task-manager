@@ -192,7 +192,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "60a13de13a34ea12305e059a"
+									"value": "60a166824fd1a351f4b2791c"
 								}
 							]
 						}
@@ -252,7 +252,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "60a13de13a34ea12305e059a"
+									"value": "60a166824fd1a351f4b2791c"
 								}
 							]
 						}
@@ -342,12 +342,30 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/tasks",
+							"raw": "{{url}}/tasks?completed=true&limit=5&skip=0&sortBy=createdAt:asc",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"tasks"
+							],
+							"query": [
+								{
+									"key": "completed",
+									"value": "true"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								},
+								{
+									"key": "skip",
+									"value": "0"
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt:asc"
+								}
 							]
 						}
 					},
@@ -370,7 +388,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "609fc2a6cbeddc27847a0b94"
+									"value": "60a166864fd1a351f4b2791e"
 								}
 							]
 						}
@@ -403,7 +421,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "609fc2a6cbeddc27847a0b94"
+									"value": "60a2490406c2371c807728c4"
 								}
 							]
 						}

@@ -10,65 +10,70 @@ const { Schema } = mongoose;
 /**
  * Schema per entità User
  */
-const schema = new Schema({
-    /**
-     * Nome
-     */
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    /**
-     * Email
-     */
-    email: {
-        type: String,
-        unique: true,
-        required: true,
-        trim: true,
-        lowercase: true,
-        validate(value) {
-            if (!validator.isEmail(value)) {
-                throw new Error(`Email ${value} is not valid`);
-            }
+const schema = new Schema(
+    {
+        /**
+         * Nome
+         */
+        name: {
+            type: String,
+            required: true,
+            trim: true,
         },
-    },
-    /**
-     * Password
-     */
-    password: {
-        type: String,
-        required: true,
-        minlength: 7,
-        trim: true,
-        validate(value) {
-            if (value.toLowerCase().includes("password")) {
-                throw new Error("password cannot include 'password' word");
-            }
-        },
-    },
-    /**
-     * Età
-     */
-    age: {
-        type: Number,
-        default: 0,
-        validate(value) {
-            if (value < 0) {
-                throw new Error("age must be greater than zero");
-            }
-        },
-    },
-    tokens: [
-        {
-            token: {
-                type: String,
-                required: true,
+        /**
+         * Email
+         */
+        email: {
+            type: String,
+            unique: true,
+            required: true,
+            trim: true,
+            lowercase: true,
+            validate(value) {
+                if (!validator.isEmail(value)) {
+                    throw new Error(`Email ${value} is not valid`);
+                }
             },
         },
-    ],
-});
+        /**
+         * Password
+         */
+        password: {
+            type: String,
+            required: true,
+            minlength: 7,
+            trim: true,
+            validate(value) {
+                if (value.toLowerCase().includes("password")) {
+                    throw new Error("password cannot include 'password' word");
+                }
+            },
+        },
+        /**
+         * Età
+         */
+        age: {
+            type: Number,
+            default: 0,
+            validate(value) {
+                if (value < 0) {
+                    throw new Error("age must be greater than zero");
+                }
+            },
+        },
+        tokens: [
+            {
+                token: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
+    },
+    {
+        timestamps: true,
+    }
+);
 
 /**
  * Proprieta virtuale di legame con i task

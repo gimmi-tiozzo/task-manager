@@ -7,9 +7,25 @@ const route = express.Router();
 
 /**
  * Ricerca tutti i task
+ *
+ * GET /tasks?completed=true
+ * GET /tasks?limit=x&skip=y (x=record per pagina, y=record da scartare da inizio insieme)
+ * GET /tasks?sortBy=createdAt:desc
  */
 route.get("/tasks", auth, async (req, res) => {
     try {
+        const match = {};
+        const sort = {};
+
+        if (req.query.completed) {
+            match.completed = req.query.completed === "true";
+        }
+
+        if (req.query.sortBy) {
+            const [field, order] = req.query.sortBy.split(":");
+            sort[field] = order === "desc" ? -1 : 1;
+        }
+
         //const tasks = await Task.find({});
 
         // const tasks = await Task.find({ owner: req.user._id });
@@ -19,7 +35,17 @@ route.get("/tasks", auth, async (req, res) => {
         //     return res.status("404").json({ message: "Tasks not found" });
         // }
 
-        await req.user.populate("tasks").execPopulate();
+        await req.user
+            .populate({
+                path: "tasks",
+                match,
+                options: {
+                    limit: parseInt(req.query.limit),
+                    skip: parseInt(req.query.skip),
+                    sort,
+                },
+            })
+            .execPopulate();
         res.json(req.user.tasks);
     } catch (e) {
         res.status(500).json();
