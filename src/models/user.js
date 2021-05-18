@@ -69,6 +69,9 @@ const schema = new Schema(
                 },
             },
         ],
+        avatar: {
+            type: Buffer,
+        },
     },
     {
         timestamps: true,
@@ -116,6 +119,7 @@ schema.methods.toJSON = function () {
 
     delete deepUserCopy.password;
     delete deepUserCopy.tokens;
+    delete deepUserCopy.avatar;
 
     return deepUserCopy;
 };
