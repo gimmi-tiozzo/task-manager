@@ -1,4 +1,4 @@
-const jwtSalt = "321jkh21h3k1k3hkug3i213giu12";
+const jwtSalt = process.env.JWT_SECRET;
 
 module.exports = {
     jwtSalt,

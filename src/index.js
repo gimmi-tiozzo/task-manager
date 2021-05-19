@@ -9,4 +9,6 @@ app.use(express.json());
 app.use(userRoute);
 app.use(taskRoute);
 
-app.listen(port);
+app.listen(port, () => {
+    console.log("Server at port: " + port);
+});
