@@ -3,7 +3,7 @@ const User = require("../models/user");
 const auth = require("../middleware/auth");
 const multer = require("multer");
 const sharp = require("sharp");
-//const email = require("../email/account");
+const email = require("../email/account");
 require("../db/mongoose");
 
 //router
@@ -136,7 +136,7 @@ route.post("/users", async (req, res) => {
         const user = await new User(req.body).save();
         const token = await user.generateAuthToken();
 
-        //email.sendWelcomeMail(user.email, user.name).catch((e) => console.error(e));
+        email.sendWelcomeMail(user.email, user.name).catch((e) => console.error(e));
         res.status(201).json({ user, token });
     } catch (e) {
         res.status(500).json(e);
@@ -218,7 +218,7 @@ route.delete("/users/me/avatar", auth, async (req, res) => {
 route.delete("/users/me", auth, async (req, res) => {
     try {
         await req.user.remove();
-        //email.sendCancelationMail(user.email, user.name).catch((e) => console.error(e));
+        email.sendCancelationMail(req.user.email, req.user.name).catch((e) => console.error(e));
         res.json(req.user);
     } catch (e) {
         res.status(500).json(e);
