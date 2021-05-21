@@ -132,7 +132,7 @@ route.delete("/tasks/:id", auth, async (req, res) => {
         const task = await Task.findOneAndDelete({ _id, owner: req.user._id });
 
         if (!task) {
-            return res.status("404").json({ message: `Task not found by id ${id}` });
+            return res.status("404").json({ message: `Task not found by id ${_id}` });
         }
 
         res.json(task);

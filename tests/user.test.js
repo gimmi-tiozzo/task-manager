@@ -1,23 +1,7 @@
 const request = require("supertest");
 const app = require("../src/app");
 const User = require("../src/models/user");
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-
-const userId = new mongoose.Types.ObjectId();
-const jwtToken = jwt.sign({ _id: userId }, process.env.JWT_SECRET);
-
-const userTestData = {
-    _id: userId,
-    name: "Test User",
-    email: "test.user@email.com",
-    password: "123_pwd_321",
-    tokens: [
-        {
-            token: jwtToken,
-        },
-    ],
-};
+const { jwtToken, userId, userTestData, setupDatabase } = require("./fixtures/db");
 
 //con after..ho i metodi di teardown (distruzione)
 
@@ -27,11 +11,7 @@ const userTestData = {
 // });
 
 //setup prima di ogni unit test
-beforeEach(async () => {
-    await User.deleteMany();
-    const user = new User(userTestData);
-    await user.save();
-});
+beforeEach(setupDatabase);
 
 test("Creazione nuovo utente", async () => {
     const response = await request(app)
@@ -96,4 +76,34 @@ test("Cancella un utente autenticato", async () => {
 
 test("Cancella un utente non autenticato", async () => {
     await request(app).delete("/users/me").send().expect(401);
+});
+
+test("Carica una immagine come avatar", async () => {
+    await request(app).post("/users/me/avatar").set("Authorization", `Bearer ${jwtToken}`).attach("avatar", "tests/fixtures/robot.jpg").expect(200);
+
+    const user = await User.findById(userId);
+    expect(user.avatar).toEqual(expect.any(Buffer));
+});
+
+test("Aggiornamento user autenticato per proprietà esistente", async () => {
+    const response = await request(app)
+        .patch("/users/me")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send({
+            name: "Jest Test",
+        })
+        .expect(200);
+
+    const user = await User.findById(userId);
+    expect(user.name).toBe(response.body.user.name);
+});
+
+test("Aggiornamento user autenticato per proprietà inesistente", async () => {
+    await request(app)
+        .patch("/users/me")
+        .set("Authorization", `Bearer ${jwtToken}`)
+        .send({
+            location: "USA",
+        })
+        .expect(400);
 });

@@ -6,7 +6,10 @@
     "scripts": {
         "start": "node src/index.js",
         "dev": "env-cmd -f ./config/.env nodemon src/index.js",
-        "test": "env-cmd -f ./config/.env jest --watch"
+        "test": "env-cmd -f ./config/.env jest --watch --runInBand"
+    },
+    "jest": {
+        "testEnvironment": "node"
     },
     "repository": {
         "type": "git",
