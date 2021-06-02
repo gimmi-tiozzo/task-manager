@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: task-env
+data:
+    PORT: "3000"
+    JWT_SECRET: "321jkh21h3k1k3hkug3i213giu12"
+    MONGO_URL: "mongo-service.default:27017" #esiste anche la variabile di ambiente MONGO_SERVICE_SERVICE_HOST
+    SG_MAIL_API_KEY: "SG.asffdfdsf9sf98s8978sd8f978fd97fd978df8sfd989fd8"

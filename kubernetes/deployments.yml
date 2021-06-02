@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: mongo-deploy
+spec:
+    selector:
+        matchLabels:
+            app: mongo
+    template:
+        metadata:
+            labels:
+                app: mongo
+        spec:
+            containers:
+                - name: mongodb
+                  image: mongo
+                  resources:
+                      limits:
+                          memory: "128Mi"
+                          cpu: "500m"
+                  volumeMounts:
+                      - mountPath: /data/db
+                        name: mongo-vol
+            volumes:
+                - name: mongo-vol
+                  persistentVolumeClaim:
+                      claimName: mongo-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: task-manager-deploy
+spec:
+    selector:
+        matchLabels:
+            app: task-manager
+    template:
+        metadata:
+            labels:
+                app: task-manager
+        spec:
+            containers:
+                - name: task-app
+                  image: gimmitest/task-manager
+                  resources:
+                      limits:
+                          memory: "128Mi"
+                          cpu: "500m"
+                  env:
+                      - name: PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: task-env
+                                key: PORT
+                      - name: JWT_SECRET
+                        valueFrom:
+                            configMapKeyRef:
+                                name: task-env
+                                key: JWT_SECRET
+                      - name: MONGO_URL
+                        valueFrom:
+                            configMapKeyRef:
+                                name: task-env
+                                key: MONGO_URL
+                      - name: SG_MAIL_API_KEY
+                        valueFrom:
+                            configMapKeyRef:
+                                name: task-env
+                                key: SG_MAIL_API_KEY
